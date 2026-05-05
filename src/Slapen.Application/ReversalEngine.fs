@@ -60,6 +60,7 @@ module ReversalEngine =
         (dataSource: NpgsqlDataSource)
         scope
         (context: BreachAccrualContext)
+        expectedStatus
         targetStatus
         reason
         notes
@@ -102,7 +103,7 @@ module ReversalEngine =
                             transaction
                             scope
                             context.Breach.Id
-                            BreachStatus.Accrued
+                            expectedStatus
                             targetStatus
                             asOf
 
@@ -134,14 +135,28 @@ module ReversalEngine =
             | None -> return Outcome.NotFound
             | Some context when
                 context.Breach.Status <> BreachStatus.Accrued
+                && context.Breach.Status <> BreachStatus.Disputed
                 || not (reversalTargetAllowed targetStatus)
                 ->
                 return Outcome.InvalidTransition(context.Breach.Status, targetStatus)
             | Some context ->
-                let accruals = uncompensatedCreditAccruals context.PreviousAccruals
+                let accruals =
+                    uncompensatedCreditAccruals context.PreviousAccruals
+                    |> List.filter (fun row -> row.BreachEventId = context.Breach.Id)
 
                 if List.isEmpty accruals then
                     return Outcome.NoAccrualsToReverse
                 else
-                    return! writeReversals dataSource scope context targetStatus reason notes createdBy asOf accruals
+                    return!
+                        writeReversals
+                            dataSource
+                            scope
+                            context
+                            context.Breach.Status
+                            targetStatus
+                            reason
+                            notes
+                            createdBy
+                            asOf
+                            accruals
         }

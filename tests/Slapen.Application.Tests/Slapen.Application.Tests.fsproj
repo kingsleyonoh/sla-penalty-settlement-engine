@@ -12,6 +12,9 @@
     <Compile Include="LedgerWriterTests.fs" />
     <Compile Include="AccrualWorkerTests.fs" />
     <Compile Include="ReversalEngineTests.fs" />
+    <Compile Include="SettlementFlowTests.fs" />
+    <Compile Include="OutboxProcessorTests.fs" />
+    <Compile Include="DisputeResolverTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,6 +34,7 @@
     <ProjectReference Include="..\..\src\Slapen.Application\Slapen.Application.fsproj" />
     <ProjectReference Include="..\..\src\Slapen.Data\Slapen.Data.fsproj" />
     <ProjectReference Include="..\..\src\Slapen.Domain\Slapen.Domain.fsproj" />
+    <ProjectReference Include="..\..\src\Slapen.Templates\Slapen.Templates.fsproj" />
   </ItemGroup>
 
 </Project>
