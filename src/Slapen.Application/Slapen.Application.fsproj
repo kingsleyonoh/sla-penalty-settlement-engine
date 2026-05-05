@@ -7,6 +7,8 @@
 
   <ItemGroup>
     <Compile Include="LedgerWriter.fs" />
+    <Compile Include="AccrualWorker.fs" />
+    <Compile Include="ReversalEngine.fs" />
   </ItemGroup>
 
   <ItemGroup>

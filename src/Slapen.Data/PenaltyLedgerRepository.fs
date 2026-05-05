@@ -178,3 +178,60 @@ module PenaltyLedgerRepository =
 
             return List.ofSeq rows
         }
+
+    let listActiveAccrualsByClause
+        (dataSource: NpgsqlDataSource)
+        (scope: TenantScope)
+        (slaClauseId: Guid)
+        : Task<LedgerEntryCandidate list> =
+        task {
+            use! connection = dataSource.OpenConnectionAsync().AsTask()
+
+            use command =
+                new NpgsqlCommand(
+                    """
+                    select
+                        pl.id,
+                        pl.tenant_id,
+                        pl.sla_clause_id,
+                        pl.breach_event_id,
+                        pl.counterparty_id,
+                        pl.contract_id,
+                        pl.entry_kind,
+                        pl.direction,
+                        pl.amount_cents,
+                        pl.currency,
+                        pl.accrual_period_start,
+                        pl.accrual_period_end,
+                        pl.compensates_ledger_id,
+                        pl.reason_code,
+                        pl.reason_notes,
+                        pl.created_at,
+                        pl.created_by_kind,
+                        pl.created_by_user_id
+                    from penalty_ledger pl
+                    where pl.tenant_id = @tenant_id
+                      and pl.sla_clause_id = @sla_clause_id
+                      and pl.entry_kind = 'accrual'
+                      and not exists (
+                          select 1
+                          from penalty_ledger rev
+                          where rev.tenant_id = pl.tenant_id
+                            and rev.entry_kind = 'reversal'
+                            and rev.compensates_ledger_id = pl.id
+                      )
+                    order by pl.created_at, pl.direction
+                    """,
+                    connection
+                )
+
+            Sql.addParameter command "tenant_id" (TenantScope.value scope)
+            Sql.addParameter command "sla_clause_id" slaClauseId
+            use! reader = command.ExecuteReaderAsync()
+            let rows = ResizeArray<LedgerEntryCandidate>()
+
+            while reader.Read() do
+                rows.Add(readLedgerEntry reader)
+
+            return List.ofSeq rows
+        }
