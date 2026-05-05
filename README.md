@@ -296,13 +296,12 @@ This project includes machine-readable context for AI tools:
 | File | What it does |
 |---|---|
 | [`llms.txt`](llms.txt) | Project summary for LLMs ([llmstxt.org](https://llmstxt.org)). |
-| [`AGENTS.md`](AGENTS.md) | Full codebase instructions for AI coding agents. |
 | [`openapi.yaml`](openapi.yaml) | OpenAPI 3.1 API specification. |
 | [`mcp.json`](mcp.json) | MCP-style tool description for AI IDEs. |
 
 ### Cursor / Other AI IDEs
 
-Point your AI agent at `AGENTS.md` for full codebase context.
+Point your AI agent at `llms.txt`, `openapi.yaml`, and `mcp.json` for public codebase context.
 
 ## Deployment
 
