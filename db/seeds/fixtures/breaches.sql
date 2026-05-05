@@ -1,0 +1,44 @@
+insert into breach_events (
+    id,
+    tenant_id,
+    contract_id,
+    sla_clause_id,
+    source,
+    source_ref,
+    metric_value,
+    units_missed,
+    observed_at,
+    reported_at,
+    raw_payload,
+    status
+)
+values
+    (
+        '14000000-0000-0000-0000-000000000001',
+        '10000000-0000-0000-0000-000000000001',
+        '12000000-0000-0000-0000-000000000001',
+        '13000000-0000-0000-0000-000000000001',
+        'manual',
+        'fixture-acme-breach-001',
+        92.0000,
+        null,
+        '2026-05-01T09:00:00Z',
+        '2026-05-01T10:00:00Z',
+        '{"source":"fixture","tenant":"acme-gmbh-de"}',
+        'pending'
+    ),
+    (
+        '25000000-0000-0000-0000-000000000001',
+        '20000000-0000-0000-0000-000000000001',
+        '23000000-0000-0000-0000-000000000001',
+        '24000000-0000-0000-0000-000000000001',
+        'manual',
+        'fixture-globex-breach-001',
+        30.0000,
+        4.0000,
+        '2026-05-02T15:00:00Z',
+        '2026-05-02T16:00:00Z',
+        '{"source":"fixture","tenant":"globex-inc-us"}',
+        'pending'
+    )
+on conflict (id) do nothing;
