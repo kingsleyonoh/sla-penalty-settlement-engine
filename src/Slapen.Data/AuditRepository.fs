@@ -139,3 +139,40 @@ module AuditRepository =
 
             return List.ofSeq rows
         }
+
+    let listForTenant (dataSource: NpgsqlDataSource) (scope: TenantScope) (limit: int) : Task<AuditLogRow list> =
+        task {
+            use! connection = dataSource.OpenConnectionAsync().AsTask()
+
+            use command =
+                new NpgsqlCommand(
+                    """
+                    select
+                        id,
+                        tenant_id,
+                        actor_kind,
+                        actor_id,
+                        action,
+                        entity_kind,
+                        entity_id,
+                        before_state::text as before_state_json,
+                        after_state::text as after_state_json,
+                        occurred_at
+                    from audit_log
+                    where tenant_id = @tenant_id
+                    order by occurred_at desc
+                    limit @limit
+                    """,
+                    connection
+                )
+
+            Sql.addParameter command "tenant_id" (TenantScope.value scope)
+            Sql.addParameter command "limit" limit
+            use! reader = command.ExecuteReaderAsync()
+            let rows = ResizeArray<AuditLogRow>()
+
+            while reader.Read() do
+                rows.Add(readAudit reader)
+
+            return List.ofSeq rows
+        }

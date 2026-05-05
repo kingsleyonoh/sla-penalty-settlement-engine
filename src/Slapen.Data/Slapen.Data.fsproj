@@ -10,9 +10,12 @@
     <Compile Include="DomainMapping.fs" />
     <Compile Include="Sql.fs" />
     <Compile Include="TenantsRepository.fs" />
+    <Compile Include="CounterpartiesRepository.fs" />
     <Compile Include="ContractsRepository.fs" />
+    <Compile Include="SlaClausesRepository.fs" />
     <Compile Include="AuditRepository.fs" />
     <Compile Include="PenaltyLedgerRepository.fs" />
+    <Compile Include="BreachEventRowsRepository.fs" />
     <Compile Include="BreachEventsRepository.fs" />
   </ItemGroup>
 
