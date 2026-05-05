@@ -6,7 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Errors.fs" />
     <Compile Include="Types.fs" />
+    <Compile Include="PenaltyConfigs.fs" />
+    <Compile Include="Invariants.fs" />
+    <Compile Include="RulesEngine.fs" />
   </ItemGroup>
 
 </Project>

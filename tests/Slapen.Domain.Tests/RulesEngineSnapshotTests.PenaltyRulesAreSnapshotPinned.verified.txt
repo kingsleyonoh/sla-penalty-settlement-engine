@@ -1,0 +1,50 @@
+[
+  {
+    Case: flat_per_breach happy path,
+    Result: Accrued 50000 EUR
+  },
+  {
+    Case: flat_per_breach period cap,
+    Result: CapApplied 40000 EUR kind=PeriodCap cap=40000 EUR prior=0 EUR uncapped=50000 EUR
+  },
+  {
+    Case: percent_of_monthly_fee prorates days in breach,
+    Result: Accrued 9677 EUR
+  },
+  {
+    Case: tiered accrues differential when crossing tier,
+    Result: Accrued 100000 EUR
+  },
+  {
+    Case: tiered overflow uses last tier already reached,
+    Result: Accrued 100000 EUR
+  },
+  {
+    Case: prior accrual currency mismatch is rejected,
+    Result: Error CurrencyMismatch ("USD", "EUR")
+  },
+  {
+    Case: compounding_daily max days cap,
+    Result: CapApplied 300000 EUR kind=PenaltyTypeMaxDays cap=300000 EUR prior=0 EUR uncapped=300000 EUR
+  },
+  {
+    Case: compounding_daily max already reached,
+    Result: NoPenalty CapAlreadyReached
+  },
+  {
+    Case: linear_per_unit_missed happy path,
+    Result: Accrued 30000 EUR
+  },
+  {
+    Case: linear_per_unit_missed missing units,
+    Result: Error MissingRequiredMetric "units_missed"
+  },
+  {
+    Case: inactive clause has no penalty,
+    Result: NoPenalty ClauseInactive
+  },
+  {
+    Case: breach before contract effective date is rejected,
+    Result: Error BreachBeforeContractActive
+  }
+]
