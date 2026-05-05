@@ -25,6 +25,7 @@
     <Compile Include="Ui\DirectoryPages.fs" />
     <Compile Include="Ui\ContractPages.fs" />
     <Compile Include="Ui\BreachLedgerPages.fs" />
+    <Compile Include="Ui\SettlementPages.fs" />
     <Compile Include="Routes.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
@@ -39,6 +40,7 @@
     <ProjectReference Include="..\Slapen.Audit\Slapen.Audit.fsproj" />
     <ProjectReference Include="..\Slapen.Data\Slapen.Data.fsproj" />
     <ProjectReference Include="..\Slapen.Domain\Slapen.Domain.fsproj" />
+    <ProjectReference Include="..\Slapen.Templates\Slapen.Templates.fsproj" />
     <ProjectReference Include="..\Slapen.Tenants\Slapen.Tenants.fsproj" />
   </ItemGroup>
 

@@ -50,23 +50,27 @@ module Breaches =
                     else
                         None
 
-                let breach =
-                    { Id = Guid.NewGuid()
-                      TenantId = TenantScope.value scope
-                      ContractId = request.ContractId
-                      SlaClauseId = request.SlaClauseId
-                      SourceRef = Option.ofObj request.SourceRef
-                      MetricValue = request.MetricValue
-                      UnitsMissed = unitsMissed
-                      ObservedAt = request.ObservedAt
-                      ReportedAt = request.ReportedAt
-                      RawPayloadJson = """{"source":"api"}""" }
+                let! result =
+                    Ingestion.ingestManual
+                        dataSource
+                        scope
+                        { ContractId = request.ContractId
+                          SlaClauseId = request.SlaClauseId
+                          SourceRef = Option.ofObj request.SourceRef
+                          MetricValue = request.MetricValue
+                          UnitsMissed = unitsMissed
+                          ObservedAt = request.ObservedAt
+                          ReportedAt = request.ReportedAt
+                          RawPayloadJson = """{"source":"api"}""" }
 
-                let! created = BreachEventRowsRepository.createManual dataSource scope breach
+                match result.BreachIds with
+                | [] -> return! Response.notFound next ctx
+                | breachId :: _ ->
+                    let! row = BreachEventRowsRepository.findById dataSource scope breachId
 
-                match created with
-                | None -> return! Response.notFound next ctx
-                | Some row ->
+                    let row =
+                        row |> Option.defaultWith (fun _ -> failwith "Created breach was not readable.")
+
                     let! _ =
                         AuditRecorder.record
                             dataSource

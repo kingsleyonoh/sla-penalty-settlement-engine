@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <Compile Include="UiFlowTests.fs" />
+    <Compile Include="CsvSettlementFlowTests.fs" />
   </ItemGroup>
 
   <ItemGroup>

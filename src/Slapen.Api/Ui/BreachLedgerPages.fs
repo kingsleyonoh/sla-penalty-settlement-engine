@@ -1,6 +1,7 @@
 namespace Slapen.Api.Ui
 
 open System
+open System.IO
 open Giraffe
 open Npgsql
 open Slapen.Api.Middleware
@@ -48,6 +49,10 @@ module UiBreachLedger =
                       <label for="metricValue">Metric value</label><input id="metricValue" name="metricValue" required />
                       <button class="primary" type="submit">Record breach</button>
                     </form></section>
+                    <section class="form-panel"><form method="post" action="/breaches/csv" enctype="multipart/form-data" class="inline-form">
+                      <label for="breachCsv">CSV breach file</label><input id="breachCsv" name="breachCsv" type="file" accept=".csv,text/csv" required />
+                      <button type="submit">Upload CSV</button>
+                    </form></section>
                     <section class="panel"><table><thead><tr><th>Breach</th><th>Status</th><th>Observed</th></tr></thead><tbody>{breachRows}</tbody></table></section>
                     """
 
@@ -68,23 +73,40 @@ module UiBreachLedger =
                 let clauseId = Guid.Parse parts[1]
                 let now = DateTimeOffset.UtcNow
 
-                let row =
-                    { Id = Guid.NewGuid()
-                      TenantId = TenantScope.value scope
-                      ContractId = contractId
-                      SlaClauseId = clauseId
-                      SourceRef = Some $"ui-{Guid.NewGuid():N}"
-                      MetricValue = Decimal.Parse(UiHttp.formValue form "metricValue")
-                      UnitsMissed = None
-                      ObservedAt = now
-                      ReportedAt = now
-                      RawPayloadJson = """{"source":"ui"}""" }
+                let! created =
+                    Ingestion.ingestManual
+                        dataSource
+                        scope
+                        { ContractId = contractId
+                          SlaClauseId = clauseId
+                          SourceRef = Some $"ui-{Guid.NewGuid():N}"
+                          MetricValue = Decimal.Parse(UiHttp.formValue form "metricValue")
+                          UnitsMissed = None
+                          ObservedAt = now
+                          ReportedAt = now
+                          RawPayloadJson = """{"source":"ui"}""" }
 
-                let! created = BreachEventRowsRepository.createManual dataSource scope row
+                match created.BreachIds with
+                | breachId :: _ -> return! UiHttp.redirect $"/breaches/{breachId}" next ctx
+                | [] -> return! UiHttp.redirect "/breaches" next ctx
+            }
 
-                match created with
-                | None -> return! UiHttp.redirect "/breaches" next ctx
-                | Some breach -> return! UiHttp.redirect $"/breaches/{breach.Id}" next ctx
+    let uploadCsv: HttpHandler =
+        fun next ctx ->
+            task {
+                let dataSource = ctx.GetService<NpgsqlDataSource>()
+                let scope = TenantAuth.requireScope ctx
+                let! form = ctx.Request.ReadFormAsync()
+                let file = form.Files.GetFile "breachCsv"
+
+                if isNull file then
+                    return! UiHttp.redirect "/breaches" next ctx
+                else
+                    use stream = file.OpenReadStream()
+                    use reader = new StreamReader(stream)
+                    let! csv = reader.ReadToEndAsync()
+                    let! _ = Ingestion.ingestCsv dataSource scope csv
+                    return! UiHttp.redirect "/breaches" next ctx
             }
 
     let breachDetail breachId : HttpHandler =
@@ -111,6 +133,9 @@ module UiBreachLedger =
                         <section class="action-row">
                           <form method="post" action="/breaches/{breach.Id}/accrue"><button class="primary" type="submit">Accrue</button></form>
                           <form method="post" action="/breaches/{breach.Id}/reverse"><button type="submit">Reverse</button></form>
+                          <form method="post" action="/breaches/{breach.Id}/dispute"><input name="reason" value="Counterparty disputed breach" hidden /><button type="submit">Open dispute</button></form>
+                          <form method="post" action="/breaches/{breach.Id}/resolve-our-favor"><button type="submit">Resolve in our favor</button></form>
+                          <form method="post" action="/breaches/{breach.Id}/resolve-against-us"><button type="submit">Resolve against us</button></form>
                         </section>
                         <section class="panel"><h2>Ledger timeline</h2><table><thead><tr><th>Kind</th><th>Direction</th><th>Amount</th><th>Reason</th></tr></thead><tbody>{timeline}</tbody></table></section>
                         """
@@ -124,6 +149,62 @@ module UiBreachLedger =
                 let dataSource = ctx.GetService<NpgsqlDataSource>()
                 let scope = TenantAuth.requireScope ctx
                 let! _ = AccrualWorker.processBreach dataSource scope breachId DateTimeOffset.UtcNow
+                return! UiHttp.redirect $"/breaches/{breachId}" next ctx
+            }
+
+    let dispute breachId : HttpHandler =
+        fun next ctx ->
+            task {
+                let dataSource = ctx.GetService<NpgsqlDataSource>()
+                let scope = TenantAuth.requireScope ctx
+                let! form = ctx.Request.ReadFormAsync()
+                let reason = UiHttp.formValue form "reason"
+
+                let reasonText =
+                    if String.IsNullOrWhiteSpace reason then
+                        "Counterparty disputed breach"
+                    else
+                        reason
+
+                let! _ = DisputeResolver.openDispute dataSource scope breachId reasonText None DateTimeOffset.UtcNow
+                return! UiHttp.redirect $"/breaches/{breachId}" next ctx
+            }
+
+    let resolveOurFavor breachId : HttpHandler =
+        fun next ctx ->
+            task {
+                let dataSource = ctx.GetService<NpgsqlDataSource>()
+                let scope = TenantAuth.requireScope ctx
+
+                let! _ =
+                    DisputeResolver.resolveDispute
+                        dataSource
+                        scope
+                        breachId
+                        DisputeResolver.ResolvedInOurFavor
+                        "Resolved in our favor from UI"
+                        CreatedBy.System
+                        DateTimeOffset.UtcNow
+
+                return! UiHttp.redirect $"/breaches/{breachId}" next ctx
+            }
+
+    let resolveAgainstUs breachId : HttpHandler =
+        fun next ctx ->
+            task {
+                let dataSource = ctx.GetService<NpgsqlDataSource>()
+                let scope = TenantAuth.requireScope ctx
+
+                let! _ =
+                    DisputeResolver.resolveDispute
+                        dataSource
+                        scope
+                        breachId
+                        DisputeResolver.ResolvedAgainstUs
+                        "Resolved against us from UI"
+                        CreatedBy.System
+                        DateTimeOffset.UtcNow
+
                 return! UiHttp.redirect $"/breaches/{breachId}" next ctx
             }
 

@@ -15,6 +15,9 @@
     <Compile Include="SettlementFlowTests.fs" />
     <Compile Include="OutboxProcessorTests.fs" />
     <Compile Include="DisputeResolverTests.fs" />
+    <Compile Include="IngestionAdapterTests.fs" />
+    <Compile Include="EcosystemStubTests.fs" />
+    <Compile Include="HangfireJobTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +37,8 @@
     <ProjectReference Include="..\..\src\Slapen.Application\Slapen.Application.fsproj" />
     <ProjectReference Include="..\..\src\Slapen.Data\Slapen.Data.fsproj" />
     <ProjectReference Include="..\..\src\Slapen.Domain\Slapen.Domain.fsproj" />
+    <ProjectReference Include="..\..\src\Slapen.Ecosystem\Slapen.Ecosystem.fsproj" />
+    <ProjectReference Include="..\..\src\Slapen.Jobs\Slapen.Jobs.fsproj" />
     <ProjectReference Include="..\..\src\Slapen.Templates\Slapen.Templates.fsproj" />
   </ItemGroup>
 

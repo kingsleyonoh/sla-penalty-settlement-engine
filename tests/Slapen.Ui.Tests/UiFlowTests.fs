@@ -215,7 +215,7 @@ type UiFlowTests(fixture: UiServerFixture) =
             let! _ = page.GotoAsync($"{fixture.BaseUrl}/login")
             do! page.GetByLabel("API key").FillAsync(TestKeys.tenantA)
             do! page.GetByRole(AriaRole.Button, PageGetByRoleOptions(Name = "Sign in")).ClickAsync()
-            do! page.WaitForURLAsync($"{fixture.BaseUrl}/")
+            do! page.GetByTestId("tenant-display-name").WaitForAsync()
 
             do! page.GetByRole(AriaRole.Link, PageGetByRoleOptions(Name = "Counterparties")).ClickAsync()
             do! page.GetByLabel("Counterparty name").FillAsync($"Supplier {unique}")

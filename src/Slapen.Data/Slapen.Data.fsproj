@@ -16,9 +16,11 @@
     <Compile Include="AuditRepository.fs" />
     <Compile Include="PenaltyLedgerRepository.fs" />
     <Compile Include="SettlementsRepository.fs" />
+    <Compile Include="SettlementUiRepository.fs" />
     <Compile Include="SettlementPostingRepository.fs" />
     <Compile Include="OutboxRepository.fs" />
     <Compile Include="BreachEventRowsRepository.fs" />
+    <Compile Include="IngestionRepository.fs" />
     <Compile Include="DisputeRepository.fs" />
     <Compile Include="BreachEventsRepository.fs" />
   </ItemGroup>

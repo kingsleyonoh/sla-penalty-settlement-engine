@@ -19,14 +19,25 @@ module Routes =
                         routef "/contracts/%O" UiContracts.contractDetail
                         route "/counterparties" >=> UiDirectories.counterparties
                         route "/ledger" >=> UiBreachLedger.ledger
+                        route "/settlements" >=> UiSettlements.list
+                        routef "/settlements/%O" UiSettlements.detail
+                        routef "/settlements/%O/preview" UiSettlements.preview
+                        routef "/settlements/%O/download" UiSettlements.download
                         route "/settings/tenant" >=> UiDashboard.settings ]
               POST
               >=> choose
                       [ route "/login" >=> UiAuth.loginPost
                         route "/logout" >=> UiAuth.logout
                         route "/breaches" >=> UiBreachLedger.createBreach
+                        route "/breaches/csv" >=> UiBreachLedger.uploadCsv
                         routef "/breaches/%O/accrue" UiBreachLedger.accrue
                         routef "/breaches/%O/reverse" UiBreachLedger.reverse
+                        routef "/breaches/%O/dispute" UiBreachLedger.dispute
+                        routef "/breaches/%O/resolve-our-favor" UiBreachLedger.resolveOurFavor
+                        routef "/breaches/%O/resolve-against-us" UiBreachLedger.resolveAgainstUs
+                        route "/settlements/build" >=> UiSettlements.build
+                        routef "/settlements/%O/approve" UiSettlements.approve
+                        routef "/settlements/%O/post" UiSettlements.post
                         route "/contracts" >=> UiDirectories.createContract
                         routef "/contracts/%O/clauses" UiContracts.createClause
                         route "/counterparties" >=> UiDirectories.createCounterparty ]

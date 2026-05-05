@@ -43,6 +43,7 @@ module Html =
                     {navItem "/contracts" "Contracts"}
                     {navItem "/counterparties" "Counterparties"}
                     {navItem "/ledger" "Ledger"}
+                    {navItem "/settlements" "Settlements"}
                     {navItem "/settings/tenant" "Settings"}
                   </nav>
                   <form method="post" action="/logout"><button class="nav-link button-link" type="submit">Sign out</button></form>
