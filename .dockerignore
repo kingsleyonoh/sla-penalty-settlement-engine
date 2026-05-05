@@ -1,0 +1,15 @@
+.git
+.agent/workflows
+.agent/guides
+.agent/agents
+.yolo
+.claude
+bin
+obj
+node_modules
+TestResults
+coverage
+playwright-report
+.env
+.env.*
+!.env.example

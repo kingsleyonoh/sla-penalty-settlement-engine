@@ -1,0 +1,24 @@
+{
+  "name": "sla-penalty-settlement-engine",
+  "version": "0.1.0",
+  "tools": [
+    {
+      "name": "list_breaches",
+      "description": "List tenant-scoped SLA breach events.",
+      "method": "GET",
+      "path": "/api/breaches"
+    },
+    {
+      "name": "create_breach",
+      "description": "Create a manual breach event.",
+      "method": "POST",
+      "path": "/api/breaches"
+    },
+    {
+      "name": "build_settlement",
+      "description": "Build a settlement from uncommitted accrual ledger entries.",
+      "method": "POST",
+      "path": "/api/settlements"
+    }
+  ]
+}

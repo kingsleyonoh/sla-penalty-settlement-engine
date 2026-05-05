@@ -1,0 +1,29 @@
+# SLA & Penalty Settlement Engine
+
+SLA & Penalty Settlement Engine turns supplier SLA breaches into auditable, collectible credit notes. It can run standalone with manual rule entry, CSV import, and generated credit-note PDFs, or integrate with the surrounding portfolio for automated breach ingestion and settlement posting.
+
+## Architecture
+- F# 8 on ASP.NET Core 8 with Giraffe handlers.
+- PostgreSQL 16 stores tenant-scoped rules, events, append-only penalty ledger, settlements, outbox, ingestion runs, and audit log.
+- Redis handles rate limiting and idempotency cache; Hangfire uses PostgreSQL backing for durable jobs.
+- Razor Pages + HTMX + Tailwind provide the ops console.
+- QuestPDF renders settlement credit notes.
+
+## API Surface
+- `GET /api/health`, `/api/health/db`, `/api/health/redis`, `/api/health/ready`
+- `POST /api/tenants/register`, `GET /api/tenants/me`
+- `/api/contracts`, `/api/sla-clauses`, `/api/breaches`, `/api/ledger`, `/api/settlements`, `/api/counterparties`, `/api/audit`
+- `POST /api/breaches/from-hub` for HMAC-verified Hub ingress
+
+## Integrations
+- Contract Lifecycle Engine via NATS JetStream and REST backfill
+- Invoice Reconciliation Engine for credit-note/debit-memo posting
+- Notification Hub for settlement/dispute notifications
+- Workflow Engine for dispute escalation playbooks
+- VPI for supplier penalty signals
+
+## Commands
+- Install: `dotnet restore Slapen.sln`
+- Develop: `dotnet watch --project src/Slapen.Api`
+- Test: `dotnet test`
+- Format: `dotnet fantomas .`

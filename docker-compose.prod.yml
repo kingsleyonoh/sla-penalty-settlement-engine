@@ -1,0 +1,42 @@
+services:
+  slapen:
+    image: ghcr.io/kingsleyonoh/sla-penalty-settlement-engine:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - ecosystem
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.slapen.rule=Host(`slapen.kingsleyonoh.com`)
+      - traefik.http.routers.slapen.entrypoints=websecure
+      - traefik.http.routers.slapen.tls.certresolver=letsencrypt
+      - traefik.http.services.slapen.loadbalancer.server.port=5109
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: slapen
+      POSTGRES_USER: slapen
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - slapen-postgres:/var/lib/postgresql/data
+    networks:
+      - ecosystem
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - ecosystem
+
+volumes:
+  slapen-postgres:
+
+networks:
+  ecosystem:
+    external: true

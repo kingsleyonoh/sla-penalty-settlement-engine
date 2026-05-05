@@ -1,0 +1,45 @@
+openapi: 3.1.0
+info:
+  title: SLA Penalty Settlement Engine API
+  version: 0.1.0
+paths:
+  /api/health:
+    get:
+      summary: App health check
+      responses:
+        "200":
+          description: Healthy
+  /api/tenants/me:
+    get:
+      summary: Resolve current tenant from API key
+      responses:
+        "200":
+          description: Tenant profile
+  /api/breaches:
+    get:
+      summary: List breach events
+      responses:
+        "200":
+          description: Breach list
+    post:
+      summary: Create a manual breach event
+      responses:
+        "201":
+          description: Breach created
+  /api/breaches/from-hub:
+    post:
+      summary: Ingest HMAC-verified breach payload from Hub
+      responses:
+        "202":
+          description: Accepted
+  /api/settlements:
+    get:
+      summary: List settlements
+      responses:
+        "200":
+          description: Settlement list
+    post:
+      summary: Build settlement from uncommitted accruals
+      responses:
+        "201":
+          description: Settlement built
