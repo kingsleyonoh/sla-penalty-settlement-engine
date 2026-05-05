@@ -2,24 +2,20 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-
     <IsPackable>false</IsPackable>
     <GenerateProgramFile>false</GenerateProgramFile>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Tests.fs" />
     <Compile Include="IntegrationFixture.fs" />
-    <Compile Include="MigrationTests.fs" />
-    <Compile Include="RepositoryTests.fs" />
+    <Compile Include="LedgerWriterTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="FsUnit.Xunit" Version="7.1.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageReference Include="Microsoft.Playwright" Version="1.59.0" />
     <PackageReference Include="Npgsql" Version="10.0.2" />
     <PackageReference Include="Testcontainers.PostgreSql" Version="4.11.0" />
     <PackageReference Include="xunit" Version="2.9.3" />
@@ -30,9 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Slapen.Application\Slapen.Application.fsproj" />
     <ProjectReference Include="..\..\src\Slapen.Data\Slapen.Data.fsproj" />
-    <ProjectReference Include="..\..\src\Slapen.Tenants\Slapen.Tenants.fsproj" />
-    <ProjectReference Include="..\..\src\Slapen.Audit\Slapen.Audit.fsproj" />
+    <ProjectReference Include="..\..\src\Slapen.Domain\Slapen.Domain.fsproj" />
   </ItemGroup>
 
 </Project>
