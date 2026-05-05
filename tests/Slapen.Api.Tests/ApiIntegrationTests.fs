@@ -119,4 +119,34 @@ type ApiIntegrationTests(fixture: PostgresFixture) =
             factory.Dispose()
         }
 
+    [<Fact>]
+    member _.``tenant scoped breach ledger returns not found across tenants``() =
+        task {
+            let tenantA, factoryA = authorizedClient TestKeys.tenantA
+            let tenantB, factoryB = authorizedClient TestKeys.tenantB
+
+            let manualBreach =
+                {| contractId = Guid.Parse("12000000-0000-0000-0000-000000000001")
+                   slaClauseId = Guid.Parse("13000000-0000-0000-0000-000000000001")
+                   sourceRef = $"cross-tenant-ledger-{Guid.NewGuid():N}"
+                   metricValue = 87.0M
+                   unitsMissed = Nullable<decimal>()
+                   observedAt = DateTimeOffset.Parse("2026-05-04T09:00:00Z")
+                   reportedAt = DateTimeOffset.Parse("2026-05-04T10:00:00Z") |}
+
+            use! created = tenantA.PostAsJsonAsync("/api/breaches/manual", manualBreach)
+            use! createdJson = readJson created
+            Assert.Equal(HttpStatusCode.Created, created.StatusCode)
+            let breachId = createdJson.RootElement.GetProperty("id").GetGuid()
+
+            use! ownLedger = tenantA.GetAsync($"/api/ledger/breaches/{breachId}")
+            Assert.Equal(HttpStatusCode.OK, ownLedger.StatusCode)
+
+            use! crossTenantLedger = tenantB.GetAsync($"/api/ledger/breaches/{breachId}")
+            Assert.Equal(HttpStatusCode.NotFound, crossTenantLedger.StatusCode)
+
+            factoryA.Dispose()
+            factoryB.Dispose()
+        }
+
     interface IClassFixture<PostgresFixture>

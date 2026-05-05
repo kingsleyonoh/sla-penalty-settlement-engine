@@ -3,12 +3,34 @@ namespace Slapen.Api
 open System
 open Giraffe
 open Slapen.Api.Handlers
+open Slapen.Api.Ui
 
 [<RequireQualifiedAccess>]
 module Routes =
     let app: HttpHandler =
         choose
-            [ subRoute
+            [ GET
+              >=> choose
+                      [ route "/login" >=> UiAuth.login
+                        route "/" >=> UiDashboard.dashboard
+                        route "/breaches" >=> UiBreachLedger.breaches
+                        routef "/breaches/%O" UiBreachLedger.breachDetail
+                        route "/contracts" >=> UiDirectories.contracts
+                        routef "/contracts/%O" UiContracts.contractDetail
+                        route "/counterparties" >=> UiDirectories.counterparties
+                        route "/ledger" >=> UiBreachLedger.ledger
+                        route "/settings/tenant" >=> UiDashboard.settings ]
+              POST
+              >=> choose
+                      [ route "/login" >=> UiAuth.loginPost
+                        route "/logout" >=> UiAuth.logout
+                        route "/breaches" >=> UiBreachLedger.createBreach
+                        routef "/breaches/%O/accrue" UiBreachLedger.accrue
+                        routef "/breaches/%O/reverse" UiBreachLedger.reverse
+                        route "/contracts" >=> UiDirectories.createContract
+                        routef "/contracts/%O/clauses" UiContracts.createClause
+                        route "/counterparties" >=> UiDirectories.createCounterparty ]
+              subRoute
                   "/api"
                   (choose
                       [ GET

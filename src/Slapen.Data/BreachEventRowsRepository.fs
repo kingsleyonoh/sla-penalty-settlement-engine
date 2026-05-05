@@ -98,6 +98,32 @@ module BreachEventRowsRepository =
                 return None
         }
 
+    let list (dataSource: NpgsqlDataSource) (scope: TenantScope) (limit: int) : Task<BreachEventRow list> =
+        task {
+            use! connection = dataSource.OpenConnectionAsync().AsTask()
+
+            use command =
+                new NpgsqlCommand(
+                    selectBreachRow
+                    + """
+                    where tenant_id = @tenant_id
+                    order by observed_at desc
+                    limit @limit
+                    """,
+                    connection
+                )
+
+            Sql.addParameter command "tenant_id" (TenantScope.value scope)
+            Sql.addParameter command "limit" limit
+            use! reader = command.ExecuteReaderAsync()
+            let rows = ResizeArray<BreachEventRow>()
+
+            while reader.Read() do
+                rows.Add(readBreachRow reader)
+
+            return List.ofSeq rows
+        }
+
     let createManual
         (dataSource: NpgsqlDataSource)
         (scope: TenantScope)

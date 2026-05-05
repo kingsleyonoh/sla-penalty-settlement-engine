@@ -6,6 +6,13 @@ open System.Threading.Tasks
 open Npgsql
 open Slapen.Domain
 
+type LedgerEntrySummary =
+    { Entry: LedgerEntryCandidate
+      ContractReference: string
+      ClauseReference: string
+      CounterpartyName: string
+      BreachStatus: string }
+
 [<RequireQualifiedAccess>]
 module PenaltyLedgerRepository =
     let private addCandidateParameters (command: NpgsqlCommand) (entry: LedgerEntryCandidate) =
@@ -131,6 +138,13 @@ module PenaltyLedgerRepository =
           CreatedAt = reader.GetFieldValue<DateTimeOffset>(reader.GetOrdinal "created_at")
           CreatedBy = DomainMapping.createdByFromText (reader.GetString(reader.GetOrdinal "created_by_kind")) userId }
 
+    let private readLedgerSummary (reader: DbDataReader) =
+        { Entry = readLedgerEntry reader
+          ContractReference = reader.GetString(reader.GetOrdinal "contract_reference")
+          ClauseReference = reader.GetString(reader.GetOrdinal "clause_reference")
+          CounterpartyName = reader.GetString(reader.GetOrdinal "counterparty_name")
+          BreachStatus = reader.GetString(reader.GetOrdinal "breach_status") }
+
     let listByBreach
         (dataSource: NpgsqlDataSource)
         (scope: TenantScope)
@@ -175,6 +189,59 @@ module PenaltyLedgerRepository =
 
             while reader.Read() do
                 rows.Add(readLedgerEntry reader)
+
+            return List.ofSeq rows
+        }
+
+    let listForTenant (dataSource: NpgsqlDataSource) (scope: TenantScope) (limit: int) : Task<LedgerEntrySummary list> =
+        task {
+            use! connection = dataSource.OpenConnectionAsync().AsTask()
+
+            use command =
+                new NpgsqlCommand(
+                    """
+                    select
+                        pl.id,
+                        pl.tenant_id,
+                        pl.sla_clause_id,
+                        pl.breach_event_id,
+                        pl.counterparty_id,
+                        pl.contract_id,
+                        pl.entry_kind,
+                        pl.direction,
+                        pl.amount_cents,
+                        pl.currency,
+                        pl.accrual_period_start,
+                        pl.accrual_period_end,
+                        pl.compensates_ledger_id,
+                        pl.reason_code,
+                        pl.reason_notes,
+                        pl.created_at,
+                        pl.created_by_kind,
+                        pl.created_by_user_id,
+                        c.reference as contract_reference,
+                        sc.reference as clause_reference,
+                        cp.canonical_name as counterparty_name,
+                        be.status as breach_status
+                    from penalty_ledger pl
+                    join contracts c on c.tenant_id = pl.tenant_id and c.id = pl.contract_id
+                    join sla_clauses sc on sc.tenant_id = pl.tenant_id and sc.id = pl.sla_clause_id
+                    join counterparties cp on cp.tenant_id = pl.tenant_id and cp.id = pl.counterparty_id
+                    join breach_events be on be.tenant_id = pl.tenant_id and be.id = pl.breach_event_id
+                    where pl.tenant_id = @tenant_id
+                    order by pl.created_at desc, pl.direction
+                    limit @limit
+                    """,
+                    connection
+                )
+
+            Sql.addParameter command "tenant_id" (TenantScope.value scope)
+            Sql.addParameter command "limit" limit
+            use! reader = command.ExecuteReaderAsync()
+            let rows = ResizeArray<LedgerEntrySummary>()
+
+            while reader.Read() do
+                rows.Add(readLedgerSummary reader)
 
             return List.ofSeq rows
         }

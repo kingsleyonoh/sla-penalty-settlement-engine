@@ -49,23 +49,49 @@ module TenantAuth =
 type TenantAuthMiddleware(next: RequestDelegate) =
     let isPublicPath (path: PathString) =
         path.StartsWithSegments(PathString "/api/health")
+        || path.StartsWithSegments(PathString "/login")
+        || path.StartsWithSegments(PathString "/ui.css")
+        || path.StartsWithSegments(PathString "/favicon.ico")
+
+    let isApiPath (path: PathString) =
+        path.StartsWithSegments(PathString "/api")
+
+    let redirectToLogin (ctx: HttpContext) =
+        let returnUrl = Uri.EscapeDataString(ctx.Request.Path + ctx.Request.QueryString)
+        ctx.Response.Redirect($"/login?returnUrl={returnUrl}")
+
+    let tryApiKey (ctx: HttpContext) =
+        if isApiPath ctx.Request.Path then
+            match ctx.Request.Headers.TryGetValue "X-API-Key" with
+            | true, values -> Some values[0]
+            | false, _ -> None
+        else
+            match ctx.Request.Cookies.TryGetValue "slapen_ui_api_key" with
+            | true, value -> Some value
+            | false, _ -> None
 
     member _.InvokeAsync(ctx: HttpContext, dataSource: NpgsqlDataSource) : Task =
         task {
             if isPublicPath ctx.Request.Path then
                 do! next.Invoke ctx
             else
-                match ctx.Request.Headers.TryGetValue "X-API-Key" with
-                | false, _ ->
-                    ctx.Response.StatusCode <- StatusCodes.Status401Unauthorized
-                    do! ctx.Response.WriteAsJsonAsync {| error = "missing_api_key" |}
-                | true, values ->
-                    let! tenant = TenantAuth.resolveTenant dataSource values[0]
+                match tryApiKey ctx with
+                | None ->
+                    if isApiPath ctx.Request.Path then
+                        ctx.Response.StatusCode <- StatusCodes.Status401Unauthorized
+                        do! ctx.Response.WriteAsJsonAsync {| error = "missing_api_key" |}
+                    else
+                        redirectToLogin ctx
+                | Some apiKey ->
+                    let! tenant = TenantAuth.resolveTenant dataSource apiKey
 
                     match tenant with
                     | None ->
-                        ctx.Response.StatusCode <- StatusCodes.Status401Unauthorized
-                        do! ctx.Response.WriteAsJsonAsync {| error = "invalid_api_key" |}
+                        if isApiPath ctx.Request.Path then
+                            ctx.Response.StatusCode <- StatusCodes.Status401Unauthorized
+                            do! ctx.Response.WriteAsJsonAsync {| error = "invalid_api_key" |}
+                        else
+                            redirectToLogin ctx
                     | Some tenant ->
                         ctx.Items[TenantAuth.ItemKey] <-
                             { Scope = TenantScope.create tenant.Id

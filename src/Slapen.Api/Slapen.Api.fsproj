@@ -18,6 +18,13 @@
     <Compile Include="Handlers\Breaches.fs" />
     <Compile Include="Handlers\Ledger.fs" />
     <Compile Include="Handlers\Audit.fs" />
+    <Compile Include="Ui\Html.fs" />
+    <Compile Include="Ui\Http.fs" />
+    <Compile Include="Ui\AuthPages.fs" />
+    <Compile Include="Ui\DashboardPages.fs" />
+    <Compile Include="Ui\DirectoryPages.fs" />
+    <Compile Include="Ui\ContractPages.fs" />
+    <Compile Include="Ui\BreachLedgerPages.fs" />
     <Compile Include="Routes.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
@@ -36,4 +43,3 @@
   </ItemGroup>
 
 </Project>
-

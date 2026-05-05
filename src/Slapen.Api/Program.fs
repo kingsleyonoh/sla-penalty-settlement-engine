@@ -33,6 +33,7 @@ module Program =
 
         app.UseMiddleware<RequestIdMiddleware>() |> ignore
         app.UseMiddleware<RateLimitingMiddleware>() |> ignore
+        app.UseStaticFiles() |> ignore
         app.UseMiddleware<TenantAuthMiddleware>() |> ignore
         app.UseGiraffe Routes.app
         app
