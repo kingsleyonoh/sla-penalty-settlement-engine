@@ -1,19 +1,46 @@
 services:
   postgres:
     image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: slapen
-      POSTGRES_USER: slapen
-      POSTGRES_PASSWORD: slapen
+    env_file:
+      - .env.local
     ports:
-      - "5432:5432"
+      - "${LOCAL_POSTGRES_PORT:-15432}:5432"
     volumes:
       - slapen-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "${LOCAL_REDIS_PORT:-6386}:6379"
+    volumes:
+      - slapen-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env.local
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    profiles:
+      - app
+    ports:
+      - "5109:5109"
 
 volumes:
   slapen-postgres:
+  slapen-redis:
