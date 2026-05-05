@@ -7,6 +7,8 @@
 | File | Summary |
 |------|---------|
 | `EXAMPLE.md` | Template showing the expected shape — delete once a real foundation primitive exists. |
+| `ingestion-adapter-settings.md` | Tenant-scoped adapter enable/test/pull-now settings and disabled no-op contract. |
+| `observability-readiness.md` | API startup observability and readiness/metrics contracts. |
 
 ## What belongs here
 

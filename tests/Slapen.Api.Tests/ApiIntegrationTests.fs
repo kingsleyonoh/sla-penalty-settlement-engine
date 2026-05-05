@@ -53,6 +53,23 @@ type ApiIntegrationTests(fixture: PostgresFixture) =
         }
 
     [<Fact>]
+    member _.``readiness reports dependency boundaries and fails closed when Redis is unavailable``() =
+        task {
+            let client, factory = createClient ()
+
+            use! response = client.GetAsync("/api/health/ready")
+            use! document = readJson response
+
+            Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode)
+            Assert.Equal("unavailable", document.RootElement.GetProperty("status").GetString())
+            Assert.True(document.RootElement.GetProperty("db").GetBoolean())
+            Assert.False(document.RootElement.GetProperty("redis").GetBoolean())
+            Assert.True(document.RootElement.GetProperty("outbox").GetBoolean())
+            Assert.True(document.RootElement.GetProperty("jobs").GetBoolean())
+            factory.Dispose()
+        }
+
+    [<Fact>]
     member _.``protected routes reject missing and invalid API keys``() =
         task {
             let client, factory = createClient ()
@@ -206,6 +223,40 @@ type ApiIntegrationTests(fixture: PostgresFixture) =
             Assert.Equal(HttpStatusCode.OK, ledger.StatusCode)
             factory.Dispose()
             tenantFactory.Dispose()
+        }
+
+    [<Fact>]
+    member _.``ingestion settings page can enable test and request pulls per tenant``() =
+        task {
+            let client, factory = createClient ()
+
+            let login =
+                new FormUrlEncodedContent(dict [ "apiKey", TestKeys.tenantA; "returnUrl", "/settings/ingestion" ])
+
+            use! loginResponse = client.PostAsync("/login", login)
+            Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode)
+
+            use! initial = client.GetAsync("/settings/ingestion")
+            let! initialHtml = initial.Content.ReadAsStringAsync()
+            Assert.Equal(HttpStatusCode.OK, initial.StatusCode)
+            Assert.Contains("Contract Lifecycle REST", initialHtml)
+            Assert.Contains("Disabled", initialHtml)
+
+            use! enabled = client.PostAsync("/settings/ingestion/contract_lifecycle_rest/enable", null)
+            Assert.Equal(HttpStatusCode.OK, enabled.StatusCode)
+
+            use! tested = client.PostAsync("/settings/ingestion/contract_lifecycle_rest/test", null)
+            Assert.Equal(HttpStatusCode.OK, tested.StatusCode)
+
+            use! pulled = client.PostAsync("/settings/ingestion/contract_lifecycle_rest/pull-now", null)
+            Assert.Equal(HttpStatusCode.OK, pulled.StatusCode)
+
+            use! updated = client.GetAsync("/settings/ingestion")
+            let! updatedHtml = updated.Content.ReadAsStringAsync()
+            Assert.Contains("Enabled", updatedHtml)
+            Assert.Contains("healthy", updatedHtml)
+            Assert.Contains("Pull requested", updatedHtml)
+            factory.Dispose()
         }
 
     interface IClassFixture<PostgresFixture>

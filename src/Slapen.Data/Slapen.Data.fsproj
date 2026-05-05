@@ -10,6 +10,7 @@
     <Compile Include="DomainMapping.fs" />
     <Compile Include="Sql.fs" />
     <Compile Include="TenantsRepository.fs" />
+    <Compile Include="IngestionSettingsRepository.fs" />
     <Compile Include="CounterpartiesRepository.fs" />
     <Compile Include="ContractsRepository.fs" />
     <Compile Include="SlaClausesRepository.fs" />
@@ -20,6 +21,8 @@
     <Compile Include="SettlementPostingRepository.fs" />
     <Compile Include="OutboxRepository.fs" />
     <Compile Include="BreachEventRowsRepository.fs" />
+    <Compile Include="DashboardRepository.fs" />
+    <Compile Include="ReadinessRepository.fs" />
     <Compile Include="IngestionRepository.fs" />
     <Compile Include="DisputeRepository.fs" />
     <Compile Include="BreachEventsRepository.fs" />

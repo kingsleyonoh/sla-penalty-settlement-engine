@@ -13,6 +13,7 @@
     <Compile Include="OutboxProcessor.fs" />
     <Compile Include="SettlementPoster.fs" />
     <Compile Include="DisputeResolver.fs" />
+    <Compile Include="IngestionControl.fs" />
     <Compile Include="Ingestion.fs" />
   </ItemGroup>
 

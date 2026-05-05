@@ -136,6 +136,7 @@ type ApiFactory(fixture: PostgresFixture) =
                     dict
                         [ "DATABASE_URL", fixture.ConnectionString
                           "SLAPEN_RATE_LIMIT_PER_MINUTE", "1000"
+                          "REDIS_URL", "redis://127.0.0.1:1/0"
                           "HUB_INGRESS_SECRET", "fake_hub_ingress_secret" ]
 
                 config.AddInMemoryCollection(values) |> ignore)

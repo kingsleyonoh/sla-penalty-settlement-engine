@@ -14,14 +14,10 @@ module UiDashboard =
                 let dataSource = ctx.GetService<NpgsqlDataSource>()
                 let scope = TenantAuth.requireScope ctx
                 let tenant = TenantAuth.requireTenant ctx
-                let! breaches = BreachEventRowsRepository.list dataSource scope 50
-                let! contracts = ContractsRepository.list dataSource scope
-                let! ledger = PenaltyLedgerRepository.listForTenant dataSource scope 50
-                let openBreaches = breaches |> List.filter (fun breach -> breach.Status = "pending")
-                let totalCents = ledger |> List.sumBy (fun row -> Money.cents row.Entry.Amount)
+                let! summary = DashboardRepository.summary dataSource scope 50
 
                 let breachRows =
-                    openBreaches
+                    summary.RecentPending
                     |> List.map (fun breach ->
                         $"""<tr><td>{Html.enc breach.Id}</td><td>{Html.badge breach.Status}</td><td>{Html.date breach.ObservedAt}</td></tr>""")
                     |> String.concat ""
@@ -30,9 +26,9 @@ module UiDashboard =
                     Html.pageHeader "Dashboard" $"Operational view for {tenant.Tenant.DisplayName}"
                     + $"""
                     <section class="metric-grid">
-                      <div class="metric"><span>Pending breaches</span><strong>{openBreaches.Length}</strong></div>
-                      <div class="metric"><span>Active contracts</span><strong>{contracts.Length}</strong></div>
-                      <div class="metric"><span>Ledger movement</span><strong>{Html.money totalCents tenant.Tenant.DefaultCurrency}</strong></div>
+                      <div class="metric"><span>Pending breaches</span><strong>{summary.PendingBreaches}</strong></div>
+                      <div class="metric"><span>Active contracts</span><strong>{summary.ActiveContracts}</strong></div>
+                      <div class="metric"><span>Ledger movement</span><strong>{Html.money summary.LedgerMovementCents tenant.Tenant.DefaultCurrency}</strong></div>
                     </section>
                     <section class="panel">
                       <h2>Breaches awaiting attention</h2>

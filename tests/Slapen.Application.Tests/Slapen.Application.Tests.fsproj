@@ -20,6 +20,7 @@
     <Compile Include="HangfireJobTests.fs" />
     <Compile Include="ContractLifecycleJobTests.fs" />
     <Compile Include="NatsIntegrationTests.fs" />
+    <Compile Include="Batch011OperationalTests.fs" />
   </ItemGroup>
 
   <ItemGroup>

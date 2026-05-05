@@ -99,6 +99,7 @@ let ``migration runner applies schema seeds fixtures and ledger immutability`` (
                   "settlement_ledger_entries"
                   "outbox"
                   "ingestion_runs"
+                  "ingestion_adapter_settings"
                   "audit_log"
                   "signal_definitions" ]
 
@@ -109,7 +110,7 @@ let ``migration runner applies schema seeds fixtures and ledger immutability`` (
 
             let! migratedCount = scalar<int64> connection "select count(*) from schema_migrations"
 
-            migratedCount |> should equal 17L
+            migratedCount |> should equal 18L
 
             let tenantScopedTables =
                 expectedTables |> List.except [ "tenants"; "signal_definitions" ]

@@ -23,7 +23,8 @@ module Routes =
                         routef "/settlements/%O" UiSettlements.detail
                         routef "/settlements/%O/preview" UiSettlements.preview
                         routef "/settlements/%O/download" UiSettlements.download
-                        route "/settings/tenant" >=> UiDashboard.settings ]
+                        route "/settings/tenant" >=> UiDashboard.settings
+                        route "/settings/ingestion" >=> UiIngestionSettings.page ]
               POST
               >=> choose
                       [ route "/login" >=> UiAuth.loginPost
@@ -38,6 +39,8 @@ module Routes =
                         route "/settlements/build" >=> UiSettlements.build
                         routef "/settlements/%O/approve" UiSettlements.approve
                         routef "/settlements/%O/post" UiSettlements.post
+                        routef "/settings/ingestion/%s/%s" (fun (adapter, actionName) ->
+                            UiIngestionSettings.action adapter actionName)
                         route "/contracts" >=> UiDirectories.createContract
                         routef "/contracts/%O/clauses" UiContracts.createClause
                         route "/counterparties" >=> UiDirectories.createCounterparty ]
@@ -48,6 +51,7 @@ module Routes =
                         >=> choose
                                 [ route "/health" >=> Health.live
                                   route "/health/db" >=> Health.db
+                                  route "/health/ready" >=> Health.ready
                                   route "/tenants/me" >=> Tenants.me
                                   route "/contracts" >=> Contracts.list
                                   routef "/contracts/%O" Contracts.detail

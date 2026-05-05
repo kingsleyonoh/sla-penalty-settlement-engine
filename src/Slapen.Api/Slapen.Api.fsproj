@@ -9,6 +9,7 @@
     <Compile Include="Middleware\RequestId.fs" />
     <Compile Include="Middleware\TenantAuth.fs" />
     <Compile Include="Middleware\RateLimiting.fs" />
+    <Compile Include="Middleware\MetricsAuth.fs" />
     <Compile Include="Handlers\Response.fs" />
     <Compile Include="Handlers\Health.fs" />
     <Compile Include="Handlers\Tenants.fs" />
@@ -23,6 +24,7 @@
     <Compile Include="Ui\Http.fs" />
     <Compile Include="Ui\AuthPages.fs" />
     <Compile Include="Ui\DashboardPages.fs" />
+    <Compile Include="Ui\IngestionSettingsPages.fs" />
     <Compile Include="Ui\DirectoryPages.fs" />
     <Compile Include="Ui\ContractPages.fs" />
     <Compile Include="Ui\BreachLedgerPages.fs" />
@@ -34,6 +36,12 @@
   <ItemGroup>
     <PackageReference Include="Giraffe" Version="6.4.0" />
     <PackageReference Include="Npgsql" Version="10.0.2" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
+    <PackageReference Include="Sentry.AspNetCore" Version="4.13.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
   </ItemGroup>
 
   <ItemGroup>

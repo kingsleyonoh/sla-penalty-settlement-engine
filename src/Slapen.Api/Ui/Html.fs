@@ -45,6 +45,7 @@ module Html =
                     {navItem "/ledger" "Ledger"}
                     {navItem "/settlements" "Settlements"}
                     {navItem "/settings/tenant" "Settings"}
+                    {navItem "/settings/ingestion" "Ingestion"}
                   </nav>
                   <form method="post" action="/logout"><button class="nav-link button-link" type="submit">Sign out</button></form>
                 </aside>

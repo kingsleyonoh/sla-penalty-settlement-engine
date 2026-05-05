@@ -129,8 +129,8 @@ type UiServerFixture() =
         startInfo.ArgumentList.Add("--no-launch-profile")
         startInfo.ArgumentList.Add("--urls")
         startInfo.ArgumentList.Add(baseUrl)
-        startInfo.RedirectStandardOutput <- true
-        startInfo.RedirectStandardError <- true
+        startInfo.RedirectStandardOutput <- false
+        startInfo.RedirectStandardError <- false
         startInfo.UseShellExecute <- false
         startInfo.Environment["DATABASE_URL"] <- connectionString
         startInfo.Environment["SLAPEN_RATE_LIMIT_PER_MINUTE"] <- "1000"

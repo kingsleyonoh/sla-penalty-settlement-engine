@@ -14,6 +14,7 @@
     <Compile Include="OutboxDeadLetterReaperJob.fs" />
     <Compile Include="ContractLifecycleRestBackfillJob.fs" />
     <Compile Include="ContractLifecycleNatsConsumer.fs" />
+    <Compile Include="EcosystemOutboxDispatcher.fs" />
     <Compile Include="HangfireWiring.fs" />
   </ItemGroup>
 
