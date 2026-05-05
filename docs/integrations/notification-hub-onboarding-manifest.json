@@ -1,0 +1,39 @@
+{
+  "tenant_name": "sla-penalty-settlement-engine",
+  "hub_url_env": "NOTIFICATION_HUB_URL",
+  "tenant_api_key_env": "NOTIFICATION_HUB_API_KEY",
+  "enabled_env": "NOTIFICATION_HUB_ENABLED",
+  "mode": "local_manifest",
+  "live_onboarding_status": "skipped_missing_admin_credentials_and_recipient",
+  "events": [
+    {
+      "event_type": "penalty.accrued",
+      "template_name": "slapen-penalty-accrued-email",
+      "channel": "email",
+      "recipient_source": "tenant.ops_email"
+    },
+    {
+      "event_type": "settlement.posted",
+      "template_name": "slapen-settlement-posted-email",
+      "channel": "email",
+      "recipient_source": "counterparty.contact.email"
+    },
+    {
+      "event_type": "breach.pending_attention",
+      "template_name": "slapen-breach-pending-digest",
+      "channel": "email",
+      "recipient_source": "tenant.ops_email"
+    },
+    {
+      "event_type": "breach.disputed_by_counterparty",
+      "template_name": "slapen-breach-disputed-email",
+      "channel": "email",
+      "recipient_source": "tenant.supervisor"
+    }
+  ],
+  "notes": [
+    "No admin key, Resend key, tenant API key, recipient address, or delivery callback secret is stored here.",
+    "Run live notification-hub-onboard only with credentials supplied through a local environment or vault.",
+    "The application client reads all Notification Hub configuration from NOTIFICATION_HUB_* environment variables."
+  ]
+}

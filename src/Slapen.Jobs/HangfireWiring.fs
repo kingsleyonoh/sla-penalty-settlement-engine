@@ -25,7 +25,13 @@ module HangfireWiring =
             Description = "Detects ingestion adapters that have not completed recently." }
           { JobId = "slapen-outbox-dead-letter-reaper"
             Cron = "0 * * * *"
-            Description = "Surfaces dead outbox messages for operator follow-up." } ]
+            Description = "Surfaces dead outbox messages for operator follow-up." }
+          { JobId = "slapen-contract-lifecycle-rest-backfill"
+            Cron = "*/15 * * * *"
+            Description = "Backfills breached obligations from Contract Lifecycle REST." }
+          { JobId = "slapen-contract-lifecycle-nats-consumer"
+            Cron = "@continuous"
+            Description = "Consumes Contract Lifecycle NATS breach events." } ]
 
     let outboxProcessor pollIntervalSeconds =
         registrations pollIntervalSeconds

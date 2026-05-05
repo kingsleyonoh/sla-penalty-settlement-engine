@@ -49,6 +49,7 @@ module TenantAuth =
 type TenantAuthMiddleware(next: RequestDelegate) =
     let isPublicPath (path: PathString) =
         path.StartsWithSegments(PathString "/api/health")
+        || path.StartsWithSegments(PathString "/api/breaches/from-hub")
         || path.StartsWithSegments(PathString "/login")
         || path.StartsWithSegments(PathString "/ui.css")
         || path.StartsWithSegments(PathString "/favicon.ico")

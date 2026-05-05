@@ -25,6 +25,16 @@ type IngestionResult =
       Rejected: int
       BreachIds: Guid list }
 
+type ExternalBreachInput =
+    { SourceRef: string
+      ContractRef: string
+      ClauseRef: string
+      MetricValue: decimal
+      UnitsMissed: decimal option
+      ObservedAt: DateTimeOffset
+      ReportedAt: DateTimeOffset
+      RawPayloadJson: string }
+
 [<RequireQualifiedAccess>]
 module Ingestion =
     let private fixedHeaders =
@@ -131,6 +141,29 @@ module Ingestion =
             return! IngestionRepository.insertBreach dataSource scope breach
         }
 
+    let private storeExternal dataSource scope source (input: ExternalBreachInput) =
+        task {
+            let! resolution =
+                IngestionRepository.resolveContractClause dataSource scope input.ContractRef input.ClauseRef
+
+            match resolution with
+            | None -> return None
+            | Some resolved ->
+                return!
+                    store
+                        dataSource
+                        scope
+                        source
+                        { ContractId = resolved.ContractId
+                          SlaClauseId = resolved.SlaClauseId
+                          SourceRef = Some input.SourceRef
+                          MetricValue = input.MetricValue
+                          UnitsMissed = input.UnitsMissed
+                          ObservedAt = input.ObservedAt
+                          ReportedAt = input.ReportedAt
+                          RawPayloadJson = input.RawPayloadJson }
+        }
+
     let ingestManual
         (dataSource: NpgsqlDataSource)
         (scope: TenantScope)
@@ -196,4 +229,30 @@ module Ingestion =
 
                 return!
                     finish dataSource scope runId "csv_import" attempted stored rejected None now (List.ofSeq breachIds)
+        }
+
+    let ingestExternal
+        (dataSource: NpgsqlDataSource)
+        (scope: TenantScope)
+        (source: string)
+        (inputs: ExternalBreachInput list)
+        : Task<IngestionResult> =
+        task {
+            let now = DateTimeOffset.UtcNow
+            let runId = Guid.NewGuid()
+            do! IngestionRepository.startRun dataSource scope runId source now
+            let mutable stored = 0
+            let mutable rejected = 0
+            let breachIds = ResizeArray<Guid>()
+
+            for input in inputs do
+                let! result = storeExternal dataSource scope source input
+
+                match result with
+                | Some breach ->
+                    stored <- stored + 1
+                    breachIds.Add breach.Id
+                | None -> rejected <- rejected + 1
+
+            return! finish dataSource scope runId source inputs.Length stored rejected None now (List.ofSeq breachIds)
         }

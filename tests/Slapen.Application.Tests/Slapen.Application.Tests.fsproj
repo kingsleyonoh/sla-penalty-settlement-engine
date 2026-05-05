@@ -18,6 +18,8 @@
     <Compile Include="IngestionAdapterTests.fs" />
     <Compile Include="EcosystemStubTests.fs" />
     <Compile Include="HangfireJobTests.fs" />
+    <Compile Include="ContractLifecycleJobTests.fs" />
+    <Compile Include="NatsIntegrationTests.fs" />
   </ItemGroup>
 
   <ItemGroup>

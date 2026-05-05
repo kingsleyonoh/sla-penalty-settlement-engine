@@ -18,6 +18,7 @@
     <Compile Include="Handlers\Breaches.fs" />
     <Compile Include="Handlers\Ledger.fs" />
     <Compile Include="Handlers\Audit.fs" />
+    <Compile Include="HubIngress.fs" />
     <Compile Include="Ui\Html.fs" />
     <Compile Include="Ui\Http.fs" />
     <Compile Include="Ui\AuthPages.fs" />

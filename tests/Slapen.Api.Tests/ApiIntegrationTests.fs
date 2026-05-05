@@ -4,6 +4,8 @@ open System
 open System.Net
 open System.Net.Http
 open System.Net.Http.Json
+open System.Security.Cryptography
+open System.Text
 open System.Text.Json
 open Xunit
 
@@ -22,6 +24,21 @@ type ApiIntegrationTests(fixture: PostgresFixture) =
             let! body = response.Content.ReadAsStringAsync()
             return JsonDocument.Parse(body)
         }
+
+    let signedRequest (body: string) =
+        let secret = Encoding.UTF8.GetBytes "fake_hub_ingress_secret"
+
+        let hashBytes =
+            use hmac = new HMACSHA256(secret)
+            hmac.ComputeHash(Encoding.UTF8.GetBytes body)
+
+        let signature =
+            hashBytes |> Convert.ToHexString |> (fun value -> value.ToLowerInvariant())
+
+        let request = new HttpRequestMessage(HttpMethod.Post, "/api/breaches/from-hub")
+        request.Content <- new StringContent(body, Encoding.UTF8, "application/json")
+        request.Headers.Add("X-Hub-Signature", $"sha256={signature}")
+        request
 
     [<Fact>]
     member _.``health is public and emits a request id``() =
@@ -147,6 +164,48 @@ type ApiIntegrationTests(fixture: PostgresFixture) =
 
             factoryA.Dispose()
             factoryB.Dispose()
+        }
+
+    [<Fact>]
+    member _.``hub ingress rejects missing and bad signatures before ingesting``() =
+        task {
+            let client, factory = createClient ()
+
+            let body =
+                """{"tenant_id":"10000000-0000-0000-0000-000000000001","event_id":"hub-bad-signature","event_type":"contract.obligation.breached","payload":{}}"""
+
+            use! missing =
+                client.PostAsync("/api/breaches/from-hub", new StringContent(body, Encoding.UTF8, "application/json"))
+
+            Assert.Equal(HttpStatusCode.Unauthorized, missing.StatusCode)
+
+            let badContent = new StringContent(body, Encoding.UTF8, "application/json")
+            badContent.Headers.Add("X-Hub-Signature", "sha256=bad")
+            use! bad = client.PostAsync("/api/breaches/from-hub", badContent)
+            Assert.Equal(HttpStatusCode.Unauthorized, bad.StatusCode)
+            factory.Dispose()
+        }
+
+    [<Fact>]
+    member _.``hub ingress verifies HMAC and ingests tenant scoped breach``() =
+        task {
+            let client, factory = createClient ()
+            let eventId = $"hub-ingress-{Guid.NewGuid():N}"
+
+            let body =
+                $"""{{"tenant_id":"10000000-0000-0000-0000-000000000001","event_id":"{eventId}","event_type":"contract.obligation.breached","payload":{{"contract_ref":"contract-acme-001","clause_ref":"Schedule B 2.3.1","metric_value":85.5,"units_missed":2.5,"observed_at":"2026-05-07T09:00:00Z","reported_at":"2026-05-07T09:03:00Z"}}}}"""
+
+            use request = signedRequest body
+            use! created = client.SendAsync request
+            use! createdJson = readJson created
+            Assert.Equal(HttpStatusCode.Created, created.StatusCode)
+            let breachId = createdJson.RootElement.GetProperty("breachId").GetGuid()
+
+            let tenantA, tenantFactory = authorizedClient TestKeys.tenantA
+            use! ledger = tenantA.GetAsync($"/api/ledger/breaches/{breachId}")
+            Assert.Equal(HttpStatusCode.OK, ledger.StatusCode)
+            factory.Dispose()
+            tenantFactory.Dispose()
         }
 
     interface IClassFixture<PostgresFixture>

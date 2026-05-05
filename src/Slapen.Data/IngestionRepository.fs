@@ -18,6 +18,8 @@ type IngestedBreach =
       ReportedAt: DateTimeOffset
       RawPayloadJson: string }
 
+type ContractClauseResolution = { ContractId: Guid; SlaClauseId: Guid }
+
 [<RequireQualifiedAccess>]
 module IngestionRepository =
     let private readBreachRow (reader: DbDataReader) =
@@ -166,6 +168,47 @@ module IngestionRepository =
 
             if hasRow then
                 return Some(readBreachRow reader)
+            else
+                return None
+        }
+
+    let resolveContractClause
+        (dataSource: NpgsqlDataSource)
+        (scope: TenantScope)
+        (contractRef: string)
+        (clauseRef: string)
+        : Task<ContractClauseResolution option> =
+        task {
+            use! connection = dataSource.OpenConnectionAsync().AsTask()
+
+            use command =
+                new NpgsqlCommand(
+                    """
+                    select c.id as contract_id, sc.id as sla_clause_id
+                    from contracts c
+                    join sla_clauses sc
+                      on sc.tenant_id = c.tenant_id
+                     and sc.contract_id = c.id
+                    where c.tenant_id = @tenant_id
+                      and (c.external_ref = @contract_ref or c.reference = @contract_ref)
+                      and sc.reference = @clause_ref
+                    order by c.created_at desc
+                    limit 1
+                    """,
+                    connection
+                )
+
+            Sql.addParameter command "tenant_id" (TenantScope.value scope)
+            Sql.addParameter command "contract_ref" contractRef
+            Sql.addParameter command "clause_ref" clauseRef
+            use! reader = command.ExecuteReaderAsync()
+            let! hasRow = reader.ReadAsync()
+
+            if hasRow then
+                return
+                    Some
+                        { ContractId = reader.GetGuid(reader.GetOrdinal "contract_id")
+                          SlaClauseId = reader.GetGuid(reader.GetOrdinal "sla_clause_id") }
             else
                 return None
         }

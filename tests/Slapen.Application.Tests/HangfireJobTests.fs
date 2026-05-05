@@ -20,7 +20,9 @@ type HangfireJobTests() =
               "slapen-outbox-processor"
               "slapen-stale-breach-reminder"
               "slapen-stale-ingestion-detector"
-              "slapen-outbox-dead-letter-reaper" ]
+              "slapen-outbox-dead-letter-reaper"
+              "slapen-contract-lifecycle-rest-backfill"
+              "slapen-contract-lifecycle-nats-consumer" ]
 
     [<Fact>]
     member _.``thin job wrappers expose testable execute methods``() : Task =

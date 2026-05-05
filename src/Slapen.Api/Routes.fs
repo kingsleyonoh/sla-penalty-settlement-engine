@@ -59,6 +59,7 @@ module Routes =
                         >=> choose
                                 [ route "/contracts" >=> Contracts.create
                                   routef "/contracts/%O/clauses" SlaClauses.create
+                                  route "/breaches/from-hub" >=> HubIngress.ingest
                                   route "/breaches/manual" >=> Breaches.createManual
                                   routef "/breaches/%O/accrue" Breaches.accrue
                                   routef "/breaches/%O/reverse" Breaches.reverse

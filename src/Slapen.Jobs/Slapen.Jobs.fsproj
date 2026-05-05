@@ -12,6 +12,8 @@
     <Compile Include="StaleBreachReminderJob.fs" />
     <Compile Include="StaleIngestionDetectorJob.fs" />
     <Compile Include="OutboxDeadLetterReaperJob.fs" />
+    <Compile Include="ContractLifecycleRestBackfillJob.fs" />
+    <Compile Include="ContractLifecycleNatsConsumer.fs" />
     <Compile Include="HangfireWiring.fs" />
   </ItemGroup>
 
