@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="EcosystemHttpClient.fs" />
+    <Compile Include="HubClient.fs" />
+    <Compile Include="WorkflowClient.fs" />
+    <Compile Include="InvoiceReconClient.fs" />
+    <Compile Include="VpiClient.fs" />
+    <Compile Include="ContractLifecycleClient.fs" />
+    <Compile Include="NatsConnection.fs" />
+    <Compile Include="EcosystemClientFactory.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+    <ProjectReference Include="..\Slapen.Domain\Slapen.Domain.fsproj" />
+  </ItemGroup>
+
+</Project>

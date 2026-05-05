@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="AccrualJob.fs" />
+    <Compile Include="SettlementBuilderJob.fs" />
+    <Compile Include="OutboxWorkerJob.fs" />
+    <Compile Include="StaleBreachReminderJob.fs" />
+    <Compile Include="StaleIngestionDetectorJob.fs" />
+    <Compile Include="OutboxDeadLetterReaperJob.fs" />
+    <Compile Include="ContractLifecycleRestBackfillJob.fs" />
+    <Compile Include="ContractLifecycleNatsConsumer.fs" />
+    <Compile Include="EcosystemOutboxDispatcher.fs" />
+    <Compile Include="HangfireWiring.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Slapen.Application\Slapen.Application.fsproj" />
+    <ProjectReference Include="..\Slapen.Ecosystem\Slapen.Ecosystem.fsproj" />
+  </ItemGroup>
+
+</Project>

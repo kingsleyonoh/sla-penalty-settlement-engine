@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="TenantScope.fs" />
+    <Compile Include="DomainMapping.fs" />
+    <Compile Include="Sql.fs" />
+    <Compile Include="TenantsRepository.fs" />
+    <Compile Include="IngestionSettingsRepository.fs" />
+    <Compile Include="CounterpartiesRepository.fs" />
+    <Compile Include="ContractsRepository.fs" />
+    <Compile Include="SlaClausesRepository.fs" />
+    <Compile Include="AuditRepository.fs" />
+    <Compile Include="PenaltyLedgerRepository.fs" />
+    <Compile Include="SettlementsRepository.fs" />
+    <Compile Include="SettlementUiRepository.fs" />
+    <Compile Include="SettlementPostingRepository.fs" />
+    <Compile Include="OutboxRepository.fs" />
+    <Compile Include="BreachEventRowsRepository.fs" />
+    <Compile Include="DashboardRepository.fs" />
+    <Compile Include="ReadinessRepository.fs" />
+    <Compile Include="IngestionRepository.fs" />
+    <Compile Include="DisputeRepository.fs" />
+    <Compile Include="BreachEventsRepository.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="10.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Slapen.Domain\Slapen.Domain.fsproj" />
+  </ItemGroup>
+
+</Project>

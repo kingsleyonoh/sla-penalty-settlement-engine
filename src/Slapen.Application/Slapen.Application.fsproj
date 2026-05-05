@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="LedgerWriter.fs" />
+    <Compile Include="AccrualWorker.fs" />
+    <Compile Include="ReversalEngine.fs" />
+    <Compile Include="SettlementBuilder.fs" />
+    <Compile Include="OutboxProcessor.fs" />
+    <Compile Include="SettlementPoster.fs" />
+    <Compile Include="DisputeResolver.fs" />
+    <Compile Include="IngestionControl.fs" />
+    <Compile Include="Ingestion.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="10.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Slapen.Domain\Slapen.Domain.fsproj" />
+    <ProjectReference Include="..\Slapen.Data\Slapen.Data.fsproj" />
+    <ProjectReference Include="..\Slapen.Tenants\Slapen.Tenants.fsproj" />
+    <ProjectReference Include="..\Slapen.Templates\Slapen.Templates.fsproj" />
+  </ItemGroup>
+
+</Project>

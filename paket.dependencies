@@ -1,0 +1,11 @@
+source https://api.nuget.org/v3/index.json
+
+framework: net8.0
+
+nuget FsUnit.Xunit
+nuget Microsoft.Playwright
+nuget Npgsql
+nuget Testcontainers.PostgreSql
+nuget Verify.Xunit
+nuget xunit
+nuget xunit.runner.visualstudio
